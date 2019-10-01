@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+    <title>NYC Taxi Hot Spots</title>
+
+    <!-- Required Stylesheets -->
+    <link 
+      type="text/css"
+      rel="stylesheet"
+      href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css"
+    />
+    <link
+      type="text/css"
+      rel="stylesheet"
+      href="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.css"
+    />
+
+    <!-- Load polyfills to support older browsers -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es2015%2CIntersectionObserver"></script>
+
+    <!-- Required scripts -->
+    <script src="https://unpkg.com/vue@latest/dist/vue.js"></script>
+    <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.js"></script>
+  </head>
+  <body>
+    <!-- Our application root element -->
+    <div id="app">
+
+        <div class="container-fluid">
+            <div class="row my-3">
+                <div class="col-lg-2">
+                    <b-button variant="primary" v-on:click="addHour(-1)">Back</b-button>
+                    <b-button variant="primary" v-on:click="addHour(1)">Next</b-button>
+                </div>
+                <div class="col-lg-4">
+                    <b-form-input id="range-d" v-model="weekday" type="range" min="0" max="6"></b-form-input>
+                    <div><span class="text-muted"><strong>Weekday:</strong></span> {{weekdayName}}</div>
+                </div>
+                <div class="col-lg-6">
+                    <b-form-input id="range-h" v-model="hour" type="range" min="0" max="23"></b-form-input>
+                    <div><span class="text-muted"><strong>Hour:</strong></span> {{hourName}}</div>
+                </div>
+            </div>
+            <div class="row my-3">
+                <div class="col-lg-6">
+                    <b-card class="mb-3" title="Pickup locations" :img-src="pickupSrc"></b-card>
+                </div>
+                <div class="col-lg-6">
+                    <b-card class="mb-3" title="Dropoff locations" :img-src="dropoffSrc"></b-card>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    <!-- Start running your app -->
+    <script>
+      window.app = new Vue({
+        el: '#app',
+        data: {
+            weekday: 0,
+            hour: 0,
+            weekdays: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
+        },
+        computed: {
+            pickupSrc() {
+                return 'images/taxi_hp2000/taxi_p_d'+this.weekday+'_h'+(this.hour < 10 ? '0'+this.hour : this.hour)+'_hp2000_cr.png';
+            },
+            dropoffSrc() {
+                return 'images/taxi_hp2000/taxi_d_d'+this.weekday+'_h'+(this.hour < 10 ? '0'+this.hour : this.hour)+'_hp2000_cr.png';
+            },
+            weekdayName() {
+                return this.weekdays[this.weekday];
+            },
+            hourName() {
+                return this.hour + ':00 to ' + this.hour + ':59';
+            }
+        },
+        methods: {
+            addHour(h) {
+                this.hour += h;
+                if (this.hour > 23) {
+                    this.hour = 0;
+                    this.weekday++;
+                } else if (this.hour < 0) {
+                    this.hour = 23;
+                    this.weekday--;
+                }
+                if (this.weekday > 6) {
+                    this.weekday = 0;
+                } else if (this.weekday < 0) {
+                    this.weekday = 6;
+                }
+            }
+        }
+      })
+    </script>
+  </body>
+</html>
