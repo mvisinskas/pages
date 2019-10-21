@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+	
+	<title>Manhattan OD</title>
+
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
+	<script src="https://unpkg.com/shpjs@latest/dist/shp.js"></script>
+
+
+	<style>
+		html, body {
+			height: 100%;
+			margin: 0;
+		}
+		#map {
+			width: 800px;
+			height: 100%;
+		}
+	</style>
+
+	
+</head>
+<body>
+
+<div id='map'></div>
+
+<script>
+	var map = L.map('map').setView([40.76, -73.98], 13);
+	var me = this;
+
+	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+		maxZoom: 18,
+		attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+			'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+			'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+		id: 'mapbox.light'
+	}).addTo(map);
+	
+	//for the shapefiles in the files folder called pandr.shp
+	shp("shapefiles/manhattan_boroughs.zip").then(function(geojson){
+		me.geojson = L.geoJSON(geojson, {
+			onEachFeature:onEachFeature
+		})
+		.on('click', onPolygonClick)
+		.addTo(map);
+	});
+
+	layerMap = {};
+	
+	function onEachFeature(feature, layer) {
+		me.layerMap[feature.properties.ctlabel] = layer;
+		//console.log(feature);
+		/*
+		var popupContent = "<p>I started out as a GeoJSON " +
+				feature.geometry.type + ", but now I'm a Leaflet vector!</p>";
+
+		if (feature.properties && feature.properties.popupContent) {
+			popupContent += feature.properties.popupContent;
+		}
+
+		layer.bindPopup(popupContent);
+		
+		layer.on({
+			click: onPolygonClick
+		});
+		*/
+	}
+
+	var selected = null;
+
+	function onPolygonClick(e) {
+		console.log('Clicked: ', e);
+		if (me.selected) {
+			try{e.target.resetStyle(me.selected);}
+			catch(error) {}
+		}
+		var layer = e.layer;
+		layer.bringToFront();
+		layer.setStyle({
+			color: '#f04040'
+		});
+		me.selected = layer;
+
+
+		me.layerMap['70'].bringToFront();
+		me.layerMap['70'].setStyle({
+			color: '#40ff40'
+		});
+
+		var pointA = new L.LatLng((layer.getBounds().getNorthEast().lat+layer.getBounds().getSouthWest().lat)/2, (layer.getBounds().getNorthEast().lng+layer.getBounds().getSouthWest().lng)/2);
+		var pointB = new L.LatLng(40.766, -73.975);
+		var pointList = [pointA, pointB];
+
+		var firstpolyline = new L.Polyline(pointList, {
+			color: 'red',
+			weight: 3,
+			opacity: 0.5,
+			smoothFactor: 1
+		});
+		firstpolyline.addTo(map);
+
+	}
+
+	
+
+	/*
+	L.geoJSON([bicycleRental, campus], {
+
+		style: function (feature) {
+			return feature.properties && feature.properties.style;
+		},
+
+		onEachFeature: onEachFeature,
+
+		pointToLayer: function (feature, latlng) {
+			return L.circleMarker(latlng, {
+				radius: 8,
+				fillColor: "#ff7800",
+				color: "#000",
+				weight: 1,
+				opacity: 1,
+				fillOpacity: 0.8
+			});
+		}
+	}).addTo(map);
+
+	L.geoJSON(freeBus, {
+
+		filter: function (feature, layer) {
+			if (feature.properties) {
+				// If the property "underConstruction" exists and is true, return false (don't render features under construction)
+				return feature.properties.underConstruction !== undefined ? !feature.properties.underConstruction : true;
+			}
+			return false;
+		},
+
+		onEachFeature: onEachFeature
+	}).addTo(map);
+
+	var coorsLayer = L.geoJSON(coorsField, {
+
+		pointToLayer: function (feature, latlng) {
+			return L.marker(latlng, {icon: baseballIcon});
+		},
+
+		onEachFeature: onEachFeature
+	}).addTo(map);
+	*/
+
+</script>
+
+
+
+</body>
+</html>

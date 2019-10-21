@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+    <title>NYC Taxi from 5 AM to 7 AM</title>
+
+    <!-- Required Stylesheets -->
+    <link 
+      type="text/css"
+      rel="stylesheet"
+      href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css"
+    />
+    <link
+      type="text/css"
+      rel="stylesheet"
+      href="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.css"
+    />
+
+    <!-- Load polyfills to support older browsers -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es2015%2CIntersectionObserver"></script>
+
+    <!-- Required scripts -->
+    <script src="https://unpkg.com/vue@latest/dist/vue.js"></script>
+    <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.js"></script>
+  </head>
+  <body>
+    <!-- Our application root element -->
+    <div id="app">
+
+        <div class="container">
+            <div class="row my-3">
+                <div class="col-12">
+                    <h3>Workday morning tweets in Manhattan</h3>
+                </div>
+            </div>
+            <div class="row my-3">
+                <div class="col-lg-6">
+                    <b-form-input id="range-d" v-model="weekday" type="range" min="0" max="4"></b-form-input>
+                    <div><span class="text-muted"><strong>Weekday:</strong></span> {{weekdayName}}</div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="alert alert-info">
+                        Word Clouds show most popular words in Manhattan areas from 4 AM to 10 AM in working days.
+                        Analysed places include Port Authority Bus Terminal, Penn Station, Grand Central Terminal.
+                        These are the hot spots for early morning pick ups.
+                    </div>
+                </div>
+            </div>
+            <div class="row my-3">
+                <div class="col-lg-12">
+                    <b-card class="mb-3" title="Port Authority Bus Terminal" :img-src="placeSrc1"></b-card>
+                </div>
+                <div class="col-lg-12">
+                    <b-card class="mb-3" title="Penn Station" :img-src="placeSrc2"></b-card>
+                </div>
+                <div class="col-lg-12">
+                    <b-card class="mb-3" title="Grand Central Terminal" :img-src="placeSrc3"></b-card>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    <!-- Start running your app -->
+    <script>
+      window.app = new Vue({
+        el: '#app',
+        data: {
+            weekday: 0,
+            hour: 0,
+            weekdays: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'],
+            place: 1,
+            places: ['port', 'penn', 'grand']
+        },
+        computed: {
+            placeSrc1() { return this.placeSrc(1); },
+            placeSrc2() { return this.placeSrc(2); },
+            placeSrc3() { return this.placeSrc(3); },
+            
+            weekdayName() {
+                return this.weekdays[this.weekday];
+            }
+        },
+        methods: {
+            placeSrc(place) {
+                return 'images/tw_clouds/wordcloud_start_'+this.places[place-1]+'_wd'+(Number(this.weekday)+1)+'_h4-10.png';
+            },
+            addHour(h) {
+                this.hour += h;
+                if (this.hour > 23) {
+                    this.hour = 0;
+                    this.weekday++;
+                } else if (this.hour < 0) {
+                    this.hour = 23;
+                    this.weekday--;
+                }
+                if (this.weekday > 6) {
+                    this.weekday = 0;
+                } else if (this.weekday < 0) {
+                    this.weekday = 6;
+                }
+            }
+        }
+      })
+    </script>
+  </body>
+</html>
