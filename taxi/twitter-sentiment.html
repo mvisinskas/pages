@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+    <title>NYC tweet sentiment</title>
+
+    <!-- Required Stylesheets -->
+    <link 
+      type="text/css"
+      rel="stylesheet"
+      href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css"
+    />
+    <link
+      type="text/css"
+      rel="stylesheet"
+      href="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.css"
+    />
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
+        integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+        crossorigin=""/>
+
+    <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"
+        integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og=="
+        crossorigin=""></script>
+
+    <!-- Load polyfills to support older browsers -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es2015%2CIntersectionObserver"></script>
+
+    <!-- Required scripts -->
+    <script src="https://unpkg.com/vue@latest/dist/vue.js"></script>
+    <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.js"></script>
+  </head>
+  <body>
+    <!-- Our application root element -->
+    <div id="app">
+
+        <div class="container-fluid">
+            <div class="row my-2">
+                <div class="col-6">
+                    <div class="card shadow-sm">
+                        <div class="card-header">Twitter analysis areas</div>
+                        <div id="map" class="w-100" style="height:700px;"></div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="alert alert-info shadow-sm" v-if="location == 'select'">
+                        <h5>Region not selected!</h5>
+                        Please, select a marker on the map, representing the analysed region.
+                    </div>
+                    <div class="card shadow-sm" v-if="location != 'select'">
+                        <div class="card-header"><strong>{{location}}</strong></div>
+                        <div class="row my-2">
+                            <div class="col-12 text-center">
+                                <b-form-group>
+                                    <b-form-radio-group
+                                        v-model="daytime"
+                                        :options="daytimes"
+                                        buttons
+                                        button-variant="outline-primary"
+                                        name="radio-btn-outline"
+                                    ></b-form-radio-group>
+                                </b-form-group>
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-6 text-center">
+                                <h5>Polarity</h5>
+                                <img :src="polaritySrc">
+                            </div>
+                            <div class="col-6 text-center">
+                                <h5>Subjectivity</h5>
+                                <img :src="subjectivitySrc">
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-12 text-center">
+                                <h5>Top20 words in positive and negative tweets</h5>
+                                <img :src="top20Src">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        
+    </div>
+
+    <!-- Start running your app -->
+    <script>
+      window.app = new Vue({
+        el: '#app',
+        data: {
+            weekday: 0,
+            hour: 0,
+            weekdays: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'],
+            place: 1,
+            places: ['port', 'penn', 'grand'],
+            location: 'select',
+            daytime: '1',
+            daytimes: [
+                { text: '4 AM - 9 AM', value: '1' },
+                { text: '10 AM - 3 PM', value: '2' },
+                { text: '4 PM - 10 PM', value: '3' }]
+        },
+        computed: {
+            polaritySrc() {return 'images/charts/tw_polarity_'+this.location+'_'+this.daytime+'.png';},
+            subjectivitySrc() {return 'images/charts/tw_subjectivity_'+this.location+'_'+this.daytime+'.png';},
+            top20Src() {return 'images/charts/tw_top20_'+this.location+'_'+this.daytime+'.png';},
+            weekdayName() {
+                return this.weekdays[this.weekday];
+            }
+        },
+        mounted() {
+            this.initMap(); 
+            this.initMarkers();   
+        },
+        methods: {
+            placeSrc(place) {
+                return 'images/tw_clouds/wordcloud_start_'+this.places[place-1]+'_wd'+(Number(this.weekday)+1)+'_h4-10.png';
+            },
+            addHour(h) {
+                this.hour += h;
+                if (this.hour > 23) {
+                    this.hour = 0;
+                    this.weekday++;
+                } else if (this.hour < 0) {
+                    this.hour = 23;
+                    this.weekday--;
+                }
+                if (this.weekday > 6) {
+                    this.weekday = 0;
+                } else if (this.weekday < 0) {
+                    this.weekday = 6;
+                }
+            },
+            initMap() { 
+                // INIT MAP
+                this.map = L.map('map').setView([40.75, -73.98],13);
+                this.tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                    subdomains: 'abcd',
+                    maxZoom: 19
+                });  
+                this.tileLayer.addTo(this.map); 
+            },
+            initMarkers() {
+                this.placeList = [
+                    ['penn',40.7498286,-73.9918182,'0.5km'],
+                    ['port',40.7565408,-73.9909329,'0.5km'],
+                    ['grand',40.7523900,-73.9765161,'0.5km'],
+                    ['healthdpt',40.7424865,-73.9747408,'0.5km'],
+                    ['jpmorgan',40.7566374,-73.9762894,'0.5km'], 
+                    ['rockfeller',40.7610509,-73.9812519,'0.5km'], 
+                    ['hearst',40.7669000,-73.9826608,'0.5km'],
+                    ['presbyterian',40.7648890,-73.9565796,'0.5km'], 
+                    ['madisonpark',40.7416054,-73.9875674,'0.5km'],
+                    ['hudsonyards',40.7548204,-74.0008719,'0.5km'],
+                    ['powerhouse',40.7710149,-73.9907682,'0.5km'],
+                    ['wtc',40.7146933,-74.0140092,'0.5km'],
+                    ['bmcc',40.7203951,-74.0100540,'0.5km']
+                ];  
+                this.placeList.forEach(place => {                 
+                    var marker= L.marker([place[1], place[2]],{title:place[0]});
+                    marker.addTo(this.map); 
+                    var layerGroup= L.layerGroup();                     
+                    layerGroup.addLayer(marker);
+                    place.marker_id = layerGroup.getLayerId(marker);
+                    marker.on({click: this.clickMarker});  
+                });
+            },
+            clickMarker(event) {
+                var location = event.target.options.title;
+                this.location = location;
+                console.log('Selected location: '+location);
+            }
+        }
+      })
+    </script>
+  </body>
+</html>

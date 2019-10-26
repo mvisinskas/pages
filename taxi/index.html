@@ -25,33 +25,38 @@
 
         <div class="container">
             <div class="row my-3">
-                <div class="col-md-6">
-                    <b-card class="mb-3" title="NYC Taxi Heat Maps" img-src="./images/heatmap_image.png">
+                <div class="col-md-4">
+                    <b-card class="mb-3 h-100" title="NYC Taxi Heat Maps" img-src="./images/heatmap_image.png">
                         <b-card-text>Heat maps for NYC Taxi pickup and dropoff locations.</b-card-text>
                         <b-button href="heatmaps.html" variant="primary">Open</b-button>
                     </b-card>
                 </div>
-                <div class="col-md-6">
-                    <b-card class="mb-3" title="NYC Taxi Hot Spots (blocks)" img-src="./images/hotspot_image.png">
-                        <b-card-text>NYC Taxi pickup and dropoff location Hot Spots aggregating to blocks</b-card-text>
-                        <b-button href="hotspots.html" variant="primary">Open</b-button>
+                <div class="col-md-4">
+                    <b-card class="mb-3 h-100" title="NYC Taxi Hot Spots (250 m)" img-src="./images/hotspot_image_250.png">
+                        <b-card-text>NYC Taxi pickup and dropoff location Hot Spots. Using 25 m square bins and calculating Gi* for 250 m distance.</b-card-text>
+                        <b-button href="hotspots250.html" variant="primary">Open</b-button>
+                    </b-card>
+                </div>
+                <div class="col-md-4">
+                    <b-card class="mb-3 h-100" title="Morning pickup dropoffs" img-src="./images/taxi_od_hs/taxi_p_d0_h05_06_hs_1m.png">
+                        <b-card-text>NYC taxi dropoff hotspots for 3 pickup locations.</b-card-text>
+                        <b-button href="pick-05-06-drop-hs.html" variant="primary">Open</b-button>
+                    </b-card>
+                </div>
+                <div class="col-md-4">
+                    <b-card class="my-3 h-100" title="Twitter word clouds" img-src="./images/tw_clouds/wordcloud_start_penn_wd2_h4-10.png">
+                        <b-card-text>Word clouds for morning pickup locations.</b-card-text>
+                        <b-button href="tweets-workdays-morning.html" variant="primary">Open</b-button>
+                    </b-card>
+                </div>
+                <div class="col-md-4">
+                    <b-card class="my-3 h-100" title="Twitter sentiment" img-src="./images/charts/tw_polarity_wtc_1.png">
+                        <b-card-text>Twitter sentiment for pickup and dropoff hotspots.</b-card-text>
+                        <b-button href="twitter-sentiment.html" variant="primary">Open</b-button>
                     </b-card>
                 </div>
             </div>
-            <div class="row my-3">
-              <div class="col-md-6">
-                  <b-card class="mb-3" title="NYC Taxi Hot Spots (250 m)" img-src="./images/hotspot_image_250.png">
-                      <b-card-text>NYC Taxi pickup and dropoff location Hot Spots. Using 25 m square bins and calculating Gi* for 250 m distance.</b-card-text>
-                      <b-button href="hotspots250.html" variant="primary">Open</b-button>
-                  </b-card>
-              </div>
-              <div class="col-md-6">
-                  <b-card class="mb-3" title="NYC Taxi Hot Spots (2000 km)" img-src="./images/hotspot_image_2000.png">
-                      <b-card-text>NYC Taxi pickup and dropoff location Hot Spots. Using points and calculating Gi* for 2 km distance.</b-card-text>
-                      <b-button href="hotspots2000.html" variant="primary">Open</b-button>
-                  </b-card>
-              </div>
-          </div>
+            
         </div>
         
     </div>
